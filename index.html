@@ -15,7 +15,7 @@
   }
   #app-title {
     position: absolute;
-    top: 20px;
+    top: 10px;
     left: 10px;
     font-size: 18px;
     color: #4CAF50;
@@ -57,7 +57,6 @@
     margin-top: 0;
     margin-bottom: 10px;
     color: #4CAF50;
-    font-family: 'Montserrat', sans-serif;
   }
   label, input, button {
     margin-bottom: 10px;
@@ -201,7 +200,7 @@
   body.light-theme .settings-group {
     border-color: #cccccc;
   }
-  body.light-theme .settings-group h3 {
+  body.light-theme .settings-group h4 {
     color: #2e7d32;
   }
   body.light-theme input {
@@ -379,7 +378,7 @@
     <button id="helpButton" class="help-button">?</button>
     
     <div class="settings-group">
-      <h3 data-translate="systemParams">Параметры системы</h3>
+      <h4 data-translate="systemParams">Параметры системы</h4>
       <label for="positivePercentage" data-translate="positivePercentage">Количество положительных (%):</label>
       <div class="input-slider-container">
         <input type="number" id="positivePercentage" min="0" max="100" value="60">
@@ -388,7 +387,7 @@
     </div>
 
     <div class="settings-group">
-      <h3 data-translate="riskParams">Параметры риска</h3>
+      <h4 data-translate="riskParams">Параметры риска</h4>
       <div class="tabs">
         <button class="tab-button active" data-tab="fixedRiskProfit" data-translate="fixedRiskProfit">Фиксированный риск/прибыль</button>
         <button class="tab-button" data-tab="dynamicRisk" data-translate="dynamicRisk">Динамический риск</button>
@@ -422,7 +421,7 @@
     </div>
 
     <div class="settings-group">
-      <h3 data-translate="financialParams">Финансовые параметры</h3>
+      <h4 data-translate="financialParams">Финансовые параметры</h4>
       <label for="capital" data-translate="capital">Капитал:</label>
       <div class="input-slider-container">
         <input type="number" id="capital" min="100" max="10000" step="100" value="1000">
@@ -448,7 +447,7 @@
     </div>
 
     <div class="settings-group">
-      <h3 data-translate="generationParams">Параметры генерации</h3>
+      <h4 data-translate="generationParams">Параметры генерации</h4>
       <label for="numTrades" data-translate="numTrades">Количество сделок в серии:</label>
       <div class="input-slider-container">
         <input type="number" id="numTrades" min="1" max="1000" value="100">
@@ -474,7 +473,7 @@
     </div>
     
     <div class="settings-group">
-      <h3 data-translate="displaySettings">Настройки отображения</h3>
+      <h4 data-translate="displaySettings">Настройки отображения</h4>
       <div class="toggle-wrapper">
         <input type="checkbox" id="showTooltips" checked>
         <label for="showTooltips" class="toggle-switch"></label>
@@ -492,19 +491,19 @@
       <span class="close">&times;</span>
       <h2 data-translate="helpTitle">Как работает приложение</h2>
       <p data-translate="helpIntro">TradeSystemVisor - это мощное приложение для моделирования и анализа торговых стратегий. Оно позволяет пользователям визуализировать потенциальные результаты торговых систем на основе заданных параметров.</p>
-      <h3 data-translate="helpGoals">Цели приложения:</h3>
+      <h4 data-translate="helpGoals">Цели приложения:</h4>
       <ul>
         <li data-translate="helpGoal1">Помочь трейдерам и инвесторам оценить эффективность различных торговых стратегий.</li>
         <li data-translate="helpGoal2">Визуализировать потенциальные результаты торговли с учетом различных параметров риска и прибыли.</li>
         <li data-translate="helpGoal3">Предоставить инструмент для оптимизации торговых систем путем экспериментов с различными параметрами.</li>
       </ul>
-      <h3 data-translate="helpBenefits">Что дает пользователю:</h3>
+      <h4 data-translate="helpBenefits">Что дает пользователю:</h4>
       <ul>
         <li data-translate="helpBenefit1">Возможность тестировать торговые стратегии без риска реальных денег.</li>
         <li data-translate="helpBenefit2">Наглядное представление о потенциальной прибыльности и рисках торговой системы.</li>
         <li data-translate="helpBenefit3">Инструмент для сравнения различных торговых подходов и их оптимизации.</li>
       </ul>
-      <h3 data-translate="helpInterface">Описание интерфейса:</h3>
+      <h4 data-translate="helpInterface">Описание интерфейса:</h4>
       <h4 data-translate="helpCharts">Графики:</h4>
       <ul>
         <li data-translate="helpChartTrades">График "Сделки" показывает накопительный результат каждой сделки в серии.</li>
@@ -923,7 +922,7 @@ function generateMultipleTrades() {
   
   const lang = document.getElementById('langToggle').textContent === 'RU' ? 'ru' : 'en';
   
-  let resultHTML = `<h3>${translations[lang].resultTitle}</h3>`;
+  let resultHTML = `<h4>${translations[lang].resultTitle}</h4>`;
   resultHTML += `<p>${translations[lang].tradeBalance} ${totalTradeResult.toFixed(2)}<br>
     ${translations[lang].profitInSeries} ${totalProfitResult.toFixed(2)}<br>
     ${translations[lang].profitPerTrade} ${(totalProfitResult / numTrades).toFixed(2)}<br>
