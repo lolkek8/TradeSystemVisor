@@ -1,0 +1,1293 @@
+<html><head><base href="https://websim.io/trading-emulator/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeSystemVision</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+  }
+  #app-title {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 14px;
+    color: #4CAF50;
+    font-weight: bold;
+    z-index: 10;
+  }
+  body.light-theme #app-title {
+    color: #2e7d32;
+  }
+  #charts-container {
+    flex: 3;
+    padding: 30px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-wrapper {
+    flex: 1;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  #interface-panel {
+    flex: 1;
+    background-color: #2d2d2d;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+  }
+  .settings-group {
+    border: 1px solid #555;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+  }
+  .settings-group h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #4CAF50;
+  }
+  label, input, button {
+    margin-bottom: 10px;
+  }
+  input {
+    background-color: #3a3a3a;
+    border: 1px solid #555;
+    color: #fff;
+    padding: 5px;
+    width: calc(100% - 12px);
+  }
+  button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    width: 100%;
+  }
+  #result {
+    margin-top: 20px;
+  }
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+  }
+  .input-slider-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .input-slider-container input[type="number"] {
+    width: 60px;
+    margin-right: 10px;
+  }
+  .input-slider-container input[type="range"] {
+    flex-grow: 1;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: #3a3a3a;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+  }
+  input[type="range"]:hover {
+    opacity: 1;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+  .help-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background-color: #808080;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  .help-button:hover {
+    background-color: #666666;
+  }
+  .theme-toggle {
+    position: absolute;
+    top: 10px;
+    right: 44px;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background-color: #808080;
+    color: white;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  .theme-toggle:hover {
+    background-color: #666666;
+  }
+  .lang-toggle {
+    position: absolute;
+    top: 10px;
+    right: 78px;
+    width: 30px;
+    height: 24px;
+    border-radius: 4px;
+    background-color: #808080;
+    color: white;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  .lang-toggle:hover {
+    background-color: #666666;
+  }
+  body.light-theme {
+    background-color: #f0f0f0;
+    color: #333333;
+  }
+  body.light-theme #interface-panel {
+    background-color: #ffffff;
+  }
+  body.light-theme .settings-group {
+    border-color: #cccccc;
+  }
+  body.light-theme .settings-group h3 {
+    color: #2e7d32;
+  }
+  body.light-theme input {
+    background-color: #ffffff;
+    border-color: #cccccc;
+    color: #333333;
+  }
+  body.light-theme button {
+    background-color: #4CAF50;
+  }
+  body.light-theme .tab-button {
+    background-color: #e0e0e0;
+    color: #333333;
+  }
+  body.light-theme .tab-button.active {
+    background-color: #4CAF50;
+    color: #ffffff;
+  }
+  body.light-theme .popup-content {
+    background-color: #ffffff;
+    color: #333333;
+  }
+  body.light-theme .popup-content h2 {
+    color: #2e7d32;
+  }
+  body.light-theme input[type="range"] {
+    background: #e0e0e0;
+  }
+  body.light-theme input[type="range"]::-webkit-slider-thumb {
+    background: #4CAF50;
+  }
+  body.light-theme input[type="range"]::-moz-range-thumb {
+    background: #4CAF50;
+  }
+  .popup {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+  .popup-content {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 30px;
+    font-size: 16px;
+    line-height: 1.6;
+    background-color: #2d2d2d;
+    margin: 15% auto;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    color: #ffffff;
+  }
+  .popup-content h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #4CAF50;
+  }
+  .popup-content h3 {
+    font-size: 20px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    color: #4CAF50;
+  }
+  .popup-content h4 {
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #4CAF50;
+  }
+  .popup-content ul {
+    padding-left: 25px;
+    margin-bottom: 20px;
+  }
+  .popup-content li {
+    margin-bottom: 10px;
+  }
+  body.light-theme .popup-content {
+    background-color: #ffffff;
+    color: #333333;
+  }
+  body.light-theme .popup-content h2,
+  body.light-theme .popup-content h3,
+  body.light-theme .popup-content h4 {
+    color: #2e7d32;
+  }
+  .tabs {
+    display: flex;
+    margin-bottom: 10px;
+  }
+  .tab-button {
+    flex: 1;
+    padding: 5px 10px;
+    background-color: #3a3a3a;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  .tab-button.active {
+    background-color: #4CAF50;
+  }
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+  .toggle-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .toggle-wrapper input[type="checkbox"] {
+    display: none;
+  }
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    transition: all 0.3s;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    top: 1px;
+    left: 1px;
+    transition: all 0.3s;
+  }
+  input[type="checkbox"]:checked + .toggle-switch {
+    background-color: #4CAF50;
+  }
+  input[type="checkbox"]:checked + .toggle-switch::after {
+    left: 21px;
+  }
+  .toggle-wrapper span {
+    font-size: 14px;
+  }
+  body.light-theme .toggle-switch {
+    background-color: #e0e0e0;
+  }
+  body.light-theme input[type="checkbox"]:checked + .toggle-switch {
+    background-color: #4CAF50;
+  }
+</style>
+</head>
+<body>
+  <script src="renderer.js"></script>
+
+  <div id="app-title" data-translate="appTitle">TradeSystemVision</div>
+  <div id="charts-container">
+    <div class="chart-wrapper">
+      <canvas id="tradeChart"></canvas>
+    </div>
+    <div class="chart-wrapper">
+      <canvas id="profitChart"></canvas>
+    </div>
+  </div>
+  <div id="interface-panel">
+    <button id="langToggle" class="lang-toggle">RU</button>
+    <button id="themeToggle" class="theme-toggle">☀</button>
+    <button id="helpButton" class="help-button">?</button>
+    
+    <div class="settings-group">
+      <h3 data-translate="systemParams">Параметры системы</h3>
+      <label for="positivePercentage" data-translate="positivePercentage">Количество положительных (%):</label>
+      <div class="input-slider-container">
+        <input type="number" id="positivePercentage" min="0" max="100" value="60">
+        <input type="range" id="positivePercentageSlider" min="0" max="100" value="60">
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3 data-translate="riskParams">Параметры риска</h3>
+      <div class="tabs">
+        <button class="tab-button active" data-tab="fixedRiskProfit" data-translate="fixedRiskProfit">Фиксированный риск/прибыль</button>
+        <button class="tab-button" data-tab="dynamicRisk" data-translate="dynamicRisk">Динамический риск</button>
+      </div>
+      <div id="fixedRiskProfit" class="tab-content active">
+        <label for="risk" data-translate="risk">Риск:</label>
+        <div class="input-slider-container">
+          <input type="number" id="risk" min="0" max="10" step="0.01" value="1">
+          <input type="range" id="riskSlider" min="0" max="10" step="0.01" value="1">
+        </div>
+        
+        <label for="profit" data-translate="profit">Прибыль:</label>
+        <div class="input-slider-container">
+          <input type="number" id="profit" min="0" max="10" step="0.01" value="1">
+          <input type="range" id="profitSlider" min="0" max="10" step="0.01" value="1">
+        </div>
+      </div>
+      <div id="dynamicRisk" class="tab-content">
+        <label for="riskPercentage" data-translate="riskPercentage">Риск % от капитала:</label>
+        <div class="input-slider-container">
+          <input type="number" id="riskPercentage" min="0" max="100" step="0.1" value="1">
+          <input type="range" id="riskPercentageSlider" min="0" max="100" step="0.1" value="1">
+        </div>
+
+        <label for="riskRewardRatio" data-translate="riskRewardRatio">Соотношение риск/прибыль:</label>
+        <div class="input-slider-container">
+          <input type="number" id="riskRewardRatio" min="0" max="10" step="0.01" value="1">
+          <input type="range" id="riskRewardRatioSlider" min="0" max="10" step="0.01" value="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3 data-translate="financialParams">Финансовые параметры</h3>
+      <label for="capital" data-translate="capital">Капитал:</label>
+      <div class="input-slider-container">
+        <input type="number" id="capital" min="100" max="10000" step="100" value="1000">
+        <input type="range" id="capitalSlider" min="100" max="10000" step="100" value="1000">
+      </div>
+      
+      <label for="commission" data-translate="commission">Комиссия (%):</label>
+      <div class="input-slider-container">
+        <input type="number" id="commission" min="0" max="5" step="0.01" value="0.1">
+        <input type="range" id="commissionSlider" min="0" max="5" step="0.01" value="0.1">
+      </div>
+      
+      <div class="toggle-wrapper">
+        <input type="checkbox" id="showUpperBoundaryCapital">
+        <label for="showUpperBoundaryCapital" class="toggle-switch"></label>
+        <span data-translate="showUpperBoundaryCapital">Отобразить верхнюю границу области вероятности капитала</span>
+      </div>
+      <div class="toggle-wrapper">
+        <input type="checkbox" id="showLowerBoundaryCapital">
+        <label for="showLowerBoundaryCapital" class="toggle-switch"></label>
+        <span data-translate="showLowerBoundaryCapital">Отобразить нижнюю границу области вероятности капитала</span>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3 data-translate="generationParams">Параметры генерации</h3>
+      <label for="numTrades" data-translate="numTrades">Количество сделок в серии:</label>
+      <div class="input-slider-container">
+        <input type="number" id="numTrades" min="1" max="1000" value="100">
+        <input type="range" id="numTradesSlider" min="1" max="1000" value="100">
+      </div>
+
+      <label for="numVariants" data-translate="numVariants">Количество вариантов:</label>
+      <div class="input-slider-container">
+        <input type="number" id="numVariants" min="1" max="10" value="1">
+        <input type="range" id="numVariantsSlider" min="1" max="10" value="1">
+      </div>
+
+      <div class="toggle-wrapper">
+        <input type="checkbox" id="showUpperBoundary">
+        <label for="showUpperBoundary" class="toggle-switch"></label>
+        <span data-translate="showUpperBoundary">Отобразить верхнюю границу области вероятности сделок</span>
+      </div>
+      <div class="toggle-wrapper">
+        <input type="checkbox" id="showLowerBoundary">
+        <label for="showLowerBoundary" class="toggle-switch"></label>
+        <span data-translate="showLowerBoundary">Отобразить нижнюю границу области вероятности сделок</span>
+      </div>
+    </div>
+    
+    <div class="settings-group">
+      <h3 data-translate="displaySettings">Настройки отображения</h3>
+      <div class="toggle-wrapper">
+        <input type="checkbox" id="showTooltips" checked>
+        <label for="showTooltips" class="toggle-switch"></label>
+        <span data-translate="showTooltips">Показывать значения при наведении</span>
+      </div>
+    </div>
+    
+    <button onclick="generateMultipleTrades()" data-translate="generate">Генерация</button>
+    
+    <div id="result"></div>
+  </div>
+
+  <div id="helpPopup" class="popup">
+    <div class="popup-content">
+      <span class="close">&times;</span>
+      <h2 data-translate="helpTitle">Как работает приложение</h2>
+      <p data-translate="helpIntro">TradeSystemVision - это мощное приложение для моделирования и анализа торговых стратегий. Оно позволяет пользователям визуализировать потенциальные результаты торговых систем на основе заданных параметров.</p>
+      <h3 data-translate="helpGoals">Цели приложения:</h3>
+      <ul>
+        <li data-translate="helpGoal1">Помочь трейдерам и инвесторам оценить эффективность различных торговых стратегий.</li>
+        <li data-translate="helpGoal2">Визуализировать потенциальные результаты торговли с учетом различных параметров риска и прибыли.</li>
+        <li data-translate="helpGoal3">Предоставить инструмент для оптимизации торговых систем путем экспериментов с различными параметрами.</li>
+      </ul>
+      <h3 data-translate="helpBenefits">Что дает пользователю:</h3>
+      <ul>
+        <li data-translate="helpBenefit1">Возможность тестировать торговые стратегии без риска реальных денег.</li>
+        <li data-translate="helpBenefit2">Наглядное представление о потенциальной прибыльности и рисках торговой системы.</li>
+        <li data-translate="helpBenefit3">Инструмент для сравнения различных торговых подходов и их оптимизации.</li>
+      </ul>
+      <h3 data-translate="helpInterface">Описание интерфейса:</h3>
+      <h4 data-translate="helpCharts">Графики:</h4>
+      <ul>
+        <li data-translate="helpChartTrades">График "Сделки" показывает накопительный результат каждой сделки в серии.</li>
+        <li data-translate="helpChartCapital">График "Капитал" отображает изменение капитала после каждой сделки.</li>
+      </ul>
+      <h4 data-translate="helpParams">Параметры:</h4>
+      <ul>
+        <li data-translate="helpParamSystem">Параметры системы: задают базовые характеристики торговой системы, такие как процент положительных сделок.</li>
+        <li data-translate="helpParamRisk">Параметры риска: позволяют настроить фиксированный или динамический риск на сделку.</li>
+        <li data-translate="helpParamFinancial">Финансовые параметры: определяют начальный капитал, комиссию и настройки отображения границ вероятности для капитала.</li>
+        <li data-translate="helpParamGeneration">Параметры генерации: контролируют количество сделок, вариантов и настройки отображения границ вероятности для сделок.</li>
+      </ul>
+      <h4 data-translate="helpControls">Элементы управления:</h4>
+      <ul>
+        <li data-translate="helpControlLang">Кнопка выбора языка (RU/EN): переключает язык интерфейса.</li>
+        <li data-translate="helpControlTheme">Кнопка смены темы (☀/☽): переключает между светлой и темной темой.</li>
+        <li data-translate="helpControlGenerate">Кнопка "Генерация": запускает процесс моделирования на основе заданных параметров.</li>
+      </ul>
+      <p data-translate="helpConclusion">Экспериментируйте с различными параметрами, чтобы увидеть, как они влияют на результаты торговли. Это поможет вам лучше понять динамику вашей торговой системы и оптимизировать ее для достижения лучших результатов.</p>
+    </div>
+  </div>
+  
+<script>
+const translations = {
+  ru: {
+    appTitle: "TradeSystemVision",
+    systemParams: "Параметры системы",
+    positivePercentage: "Количество положительных (%):",
+    riskParams: "Параметры риска",
+    fixedRiskProfit: "Фиксированный риск/прибыль",
+    dynamicRisk: "Динамический риск",
+    risk: "Риск:",
+    profit: "Прибыль:",
+    riskPercentage: "Риск % от капитала:",
+    riskRewardRatio: "Соотношение риск/прибыль:",
+    financialParams: "Финансовые параметры",
+    capital: "Капитал:",
+    commission: "Комиссия (%):",
+    showUpperBoundaryCapital: "Отобразить верхнюю границу области вероятности капитала",
+    showLowerBoundaryCapital: "Отобразить нижнюю границу области вероятности капитала",
+    generationParams: "Параметры генерации",
+    numTrades: "Количество сделок в серии:",
+    numVariants: "Количество вариантов:",
+    showUpperBoundary: "Отобразить верхнюю границу области вероятности сделок",
+    showLowerBoundary: "Отобразить нижнюю границу области вероятности сделок",
+    displaySettings: "Настройки отображения",
+    showTooltips: "Показывать значения при наведении",
+    generate: "Генерация",
+    helpTitle: "Как работает приложение",
+    helpIntro: "TradeSystemVision - это мощное приложение для моделирования и анализа торговых стратегий. Оно позволяет пользователям визуализировать потенциальные результаты торговых систем на основе заданных параметров.",
+    helpGoals: "Цели приложения:",
+    helpGoal1: "Помочь трейдерам и инвесторам оценить эффективность различных торговых стратегий.",
+    helpGoal2: "Визуализировать потенциальные результаты торговли с учетом различных параметров риска и прибыли.",
+    helpGoal3: "Предоставить инструмент для оптимизации торговых систем путем экспериментов с различными параметрами.",
+    helpBenefits: "Что дает пользователю:",
+    helpBenefit1: "Возможность тестировать торговые стратегии без риска реальных денег.",
+    helpBenefit2: "Наглядное представление о потенциальной прибыльности и рисках торговой системы.",
+    helpBenefit3: "Инструмент для сравнения различных торговых подходов и их оптимизации.",
+    helpInterface: "Описание интерфейса:",
+    helpCharts: "Графики:",
+    helpChartTrades: "График \"Сделки\" показывает накопительный результат каждой сделки в серии.",
+    helpChartCapital: "График \"Капитал\" отображает изменение капитала после каждой сделки.",
+    helpParams: "Параметры:",
+    helpParamSystem: "Параметры системы: задают базовые характеристики торговой системы, такие как процент положительных сделок.",
+    helpParamRisk: "Параметры риска: позволяют настроить фиксированный или динамический риск на сделку.",
+    helpParamFinancial: "Финансовые параметры: определяют начальный капитал, комиссию и настройки отображения границ вероятности для капитала.",
+    helpParamGeneration: "Параметры генерации: контролируют количество сделок, вариантов и настройки отображения границ вероятности для сделок.",
+    helpControls: "Элементы управления:",
+    helpControlLang: "Кнопка выбора языка (RU/EN): переключает язык интерфейса.",
+    helpControlTheme: "Кнопка смены темы (☀/☽): переключает между светлой и темной темой.",
+    helpControlGenerate: "Кнопка \"Генерация\": запускает процесс моделирования на основе заданных параметров.",
+    helpConclusion: "Экспериментируйте с различными параметрами, чтобы увидеть, как они влияют на результаты торговли. Это поможет вам лучше понять динамику вашей торговой системы и оптимизировать ее для достижения лучших результатов.",
+    tradesChart: "Сделки",
+    capitalChart: "Капитал",
+    resultTitle: "Общий результат:",
+    tradeBalance: "Баланс сделок в серии:",
+    profitInSeries: "Прибыль в серии:",
+    profitPerTrade: "Прибыль в сделке:",
+    totalCommission: "Общая комиссия:",
+    calculationBasis: "Расчет произведен на основе параметров",
+    fixedRiskProfitParams: "Фиксированного риска/прибыли",
+    dynamicRiskParams: "Динамического риска"
+  },
+  en: {
+    appTitle: "TradeSystemVision",
+    systemParams: "System Parameters",
+    positivePercentage: "Positive Percentage (%):",
+    riskParams: "Risk Parameters",
+    fixedRiskProfit: "Fixed Risk/Profit",
+    dynamicRisk: "Dynamic Risk",
+    risk: "Risk:",
+    profit: "Profit:",
+    riskPercentage: "Risk % of Capital:",
+    riskRewardRatio: "Risk/Reward Ratio:",
+    financialParams: "Financial Parameters",
+    capital: "Capital:",
+    commission: "Commission (%):",
+    showUpperBoundaryCapital: "Show Upper Boundary of Capital Probability Area",
+    showLowerBoundaryCapital: "Show Lower Boundary of Capital Probability Area",
+    generationParams: "Generation Parameters",
+    numTrades: "Number of Trades in Series:",
+    numVariants: "Number of Variants:",
+    showUpperBoundary: "Show Upper Boundary of Trade Probability Area",
+    showLowerBoundary: "Show Lower Boundary of Trade Probability Area",
+    displaySettings: "Display Settings",
+    showTooltips: "Show Values on Hover",
+    generate: "Generate",
+    helpTitle: "How the Application Works",
+    helpIntro: "TradeSystemVision is a powerful application for modeling and analyzing trading strategies. It allows users to visualize potential outcomes of trading systems based on given parameters.",
+    helpGoals: "Goals of the application:",
+    helpGoal1: "Help traders and investors assess the effectiveness of various trading strategies.",
+    helpGoal2: "Visualize potential trading results considering various risk and profit parameters.",
+    helpGoal3: "Provide a tool for optimizing trading systems through experimentation with different parameters.",
+    helpBenefits: "What it gives the user:",
+    helpBenefit1: "Ability to test trading strategies without risking real money.",
+    helpBenefit2: "A clear representation of potential profitability and risks of a trading system.",
+    helpBenefit3: "A tool for comparing different trading approaches and optimizing them.",
+    helpInterface: "Interface description:",
+    helpCharts: "Charts:",
+    helpChartTrades: "The 'Trades' chart shows the cumulative result of each trade in the series.",
+    helpChartCapital: "The 'Capital' chart displays the change in capital after each trade.",
+    helpParams: "Parameters:",
+    helpParamSystem: "System Parameters: set the basic characteristics of the trading system, such as the percentage of positive trades.",
+    helpParamRisk: "Risk Parameters: allow setting fixed or dynamic risk per trade.",
+    helpParamFinancial: "Financial Parameters: determine the initial capital, commission, and display settings for capital probability boundaries.",
+    helpParamGeneration: "Generation Parameters: control the number of trades, variants, and display settings for trade probability boundaries.",
+    helpControls: "Controls:",
+    helpControlLang: "Language toggle button (RU/EN): switches the interface language.",
+    helpControlTheme: "Theme switch button (☀/☽): toggles between light and dark themes.",
+    helpControlGenerate: "The 'Generate' button: starts the simulation process based on the given parameters.",
+    helpConclusion: "Experiment with different parameters to see how they affect trading results. This will help you better understand the dynamics of your trading system and optimize it for achieving better outcomes.",
+    tradesChart: "Trades",
+    capitalChart: "Capital",
+    resultTitle: "Overall Result:",
+    tradeBalance: "Trade Balance in Series:",
+    profitInSeries: "Profit in Series:",
+    profitPerTrade: "Profit per Trade:",
+    totalCommission: "Total Commission:",
+    calculationBasis: "Calculation based on parameters of",
+    fixedRiskProfitParams: "Fixed Risk/Profit",
+    dynamicRiskParams: "Dynamic Risk"
+  }
+};
+
+function getVibrantColor(index, isDarkTheme) {
+  const darkColors = [
+    'rgb(255, 99, 132)',   // Bright Pink
+    'rgb(54, 162, 235)',   // Bright Blue
+    'rgb(255, 206, 86)',   // Bright Yellow
+    'rgb(75, 192, 192)',   // Bright Teal
+    'rgb(153, 102, 255)',  // Bright Purple
+    'rgb(255, 159, 64)',   // Bright Orange
+    'rgb(0, 255, 0)',      // Bright Green
+    'rgb(255, 0, 255)',    // Bright Magenta
+    'rgb(0, 255, 255)',    // Bright Cyan
+    'rgb(255, 255, 0)'     // Bright Yellow
+  ];
+  
+  const lightColors = [
+    'rgb(220, 20, 60)',    // Crimson
+    'rgb(0, 0, 255)',      // Blue
+    'rgb(255, 140, 0)',    // Dark Orange
+    'rgb(0, 128, 128)',    // Teal
+    'rgb(128, 0, 128)',    // Purple
+    'rgb(0, 100, 0)',      // Dark Green
+    'rgb(139, 0, 0)',      // Dark Red
+    'rgb(0, 0, 139)',      // Dark Blue
+    'rgb(184, 134, 11)',   // Dark Goldenrod
+    'rgb(85, 107, 47)'     // Dark Olive Green
+  ];
+  
+  const colors = isDarkTheme ? darkColors : lightColors;
+  return colors[index % colors.length];
+}
+
+let tradeChart, profitChart;
+let activeTab = 'fixedRiskProfit';
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+  activeTab = tabId;
+}
+
+document.querySelectorAll('.tab-button').forEach(button => {
+  button.addEventListener('click', () => switchTab(button.dataset.tab));
+});
+
+function calculateLowerBoundaryCapital(numTrades, numNegative, capital, risk, profit, commission, riskPercentage, riskRewardRatio) {
+  let lowerBoundaryCapital = [capital];
+  let currentCapitalLower = capital;
+  for (let i = 0; i < numTrades; i++) {
+    if (i < numNegative) {
+      if (activeTab === 'fixedRiskProfit') {
+        currentCapitalLower -= risk * (1 + commission);
+      } else {
+        const riskAmount = currentCapitalLower * (riskPercentage / 100);
+        currentCapitalLower -= riskAmount * (1 + commission);
+      }
+    } else {
+      if (activeTab === 'fixedRiskProfit') {
+        currentCapitalLower += profit * (1 - commission);
+      } else {
+        const riskAmount = currentCapitalLower * (riskPercentage / 100);
+        currentCapitalLower += riskAmount * riskRewardRatio * (1 - commission);
+      }
+    }
+    lowerBoundaryCapital.push(currentCapitalLower);
+  }
+  return lowerBoundaryCapital;
+}
+
+function generateTrades() {
+  const numTrades = parseInt(document.getElementById('numTrades').value);
+  const positivePercentage = parseInt(document.getElementById('positivePercentage').value);
+  const risk = parseFloat(document.getElementById('risk').value);
+  const profit = parseFloat(document.getElementById('profit').value);
+  const capital = parseFloat(document.getElementById('capital').value); 
+  const commission = parseFloat(document.getElementById('commission').value) / 100;
+  const riskPercentage = parseFloat(document.getElementById('riskPercentage').value);
+  const riskRewardRatio = parseFloat(document.getElementById('riskRewardRatio').value);
+  
+  if (isNaN(numTrades) || isNaN(positivePercentage) || isNaN(risk) || isNaN(profit) || isNaN(capital) || isNaN(commission) || isNaN(riskPercentage) || 
+      (activeTab === 'dynamicRisk' && isNaN(riskRewardRatio)) ||
+      numTrades < 1 || positivePercentage < 0 || positivePercentage > 100 || risk < 0 || profit < 0 || capital < 100 || capital > 10000 || commission < 0 || commission > 100 || riskPercentage < 0 || riskPercentage > 100) {
+    alert('Пожалуйста, введите корректные значения.');
+    return null;
+  }
+  
+  const riskAmount = capital * (riskPercentage / 100);
+  
+  const numPositive = Math.round(numTrades * positivePercentage / 100);
+  const numNegative = numTrades - numPositive;
+  
+  let trades = new Array(numPositive).fill(1).concat(new Array(numNegative).fill(-1));
+  
+  for (let i = trades.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [trades[i], trades[j]] = [trades[j], trades[i]];
+  }
+  
+  const cumulativeSum = trades.reduce((acc, cur, i) => {
+    acc.push((acc[i-1] || 0) + cur);
+    return acc;
+  }, []);
+  
+  let totalCommission = 0;
+  let currentCapital = capital;
+  const profitSum = trades.map((trade) => {
+    let tradeProfit;
+    if (activeTab === 'fixedRiskProfit') {
+      if (trade === 1) {
+        tradeProfit = profit * (1 - commission);
+      } else {
+        tradeProfit = -risk * (1 + commission);
+      }
+    } else {
+      const riskAmount = currentCapital * (riskPercentage / 100);
+      if (trade === 1) {
+        tradeProfit = riskAmount * riskRewardRatio * (1 - commission);
+      } else {
+        tradeProfit = -riskAmount * (1 + commission);
+      }
+    }
+    currentCapital += tradeProfit;
+    totalCommission += tradeProfit < 0 ? riskAmount * commission : profit * commission;
+    return currentCapital;
+  });
+
+  const upperBoundary = Array(numTrades).fill(0).map((_, i) => {
+    if (i < numPositive) {
+      return i + 1;
+    } else {
+      return numPositive - (i - numPositive + 1);
+    }
+  });
+
+  const lowerBoundary = Array(numTrades).fill(0).map((_, i) => {
+    if (i < numNegative) {
+      return -(i + 1);
+    } else {
+      return -numNegative + (i - numNegative + 1);
+    }
+  });
+  
+  let upperBoundaryCapital = [capital];
+  let currentCapitalUpper = capital;
+  for (let i = 0; i < numTrades; i++) {
+    if (i < numPositive) {
+      if (activeTab === 'fixedRiskProfit') {
+        currentCapitalUpper += profit * (1 - commission);
+      } else {
+        const riskAmount = currentCapitalUpper * (riskPercentage / 100);
+        currentCapitalUpper += riskAmount * riskRewardRatio * (1 - commission);
+      }
+    } else {
+      if (activeTab === 'fixedRiskProfit') {
+        currentCapitalUpper -= risk * (1 + commission);
+      } else {
+        const riskAmount = currentCapitalUpper * (riskPercentage / 100);
+        currentCapitalUpper -= riskAmount * (1 + commission);
+      }
+    }
+    upperBoundaryCapital.push(currentCapitalUpper);
+  }
+
+  const lowerBoundaryCapital = calculateLowerBoundaryCapital(numTrades, numNegative, capital, risk, profit, commission, riskPercentage, riskRewardRatio);
+
+  return { cumulativeSum, profitSum, totalCommission, upperBoundary, lowerBoundary, upperBoundaryCapital, lowerBoundaryCapital };
+}
+
+function generateMultipleTrades() {
+  const numVariants = parseInt(document.getElementById('numVariants').value);
+  if (isNaN(numVariants) || numVariants < 1 || numVariants > 10) {
+    alert('Пожалуйста, введите корректное количество вариантов (от 1 до 10).');
+    return;
+  }
+  
+  let tradeDatasets = [];
+  let profitDatasets = [];
+  let upperBoundaryDataset = null;
+  let lowerBoundaryDataset = null;
+  let upperBoundaryCapitalDataset = null;
+  let lowerBoundaryCapitalDataset = null;
+  let totalTradeResult = 0;
+  let totalProfitResult = 0;
+  let totalCommissionResult = 0;
+  const numTrades = parseInt(document.getElementById('numTrades').value);
+  const capital = parseFloat(document.getElementById('capital').value);
+  
+  const isDarkTheme = !document.body.classList.contains('light-theme');
+  
+  for (let i = 0; i < numVariants; i++) {
+    const result = generateTrades();
+    if (!result) {
+      alert('Ошибка при генерации сделок. Пожалуйста, проверьте введенные параметры.');
+      return;
+    }
+    
+    const { cumulativeSum, profitSum, totalCommission, upperBoundary, lowerBoundary, upperBoundaryCapital, lowerBoundaryCapital } = result;
+    
+    const color = getVibrantColor(i, isDarkTheme);
+    
+    tradeDatasets.push({
+      data: cumulativeSum,
+      borderColor: color,
+      borderWidth: 1,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: color,
+      fill: false
+    });
+    
+    profitDatasets.push({
+      data: profitSum,  
+      borderColor: color,
+      borderWidth: 1,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: color,
+      fill: false
+    });
+    
+    if (i === 0) {
+      upperBoundaryDataset = {
+        data: upperBoundary,
+        borderColor: 'rgba(0, 255, 0, 0.8)',
+        borderWidth: 2,
+        borderDash: [2, 2],
+        pointRadius: 0,
+        fill: false
+      };
+      lowerBoundaryDataset = {
+        data: lowerBoundary,
+        borderColor: 'rgba(255, 0, 0, 0.8)',
+        borderWidth: 2,
+        borderDash: [2, 2],
+        pointRadius: 0,
+        fill: false
+      };
+      upperBoundaryCapitalDataset = {
+        data: upperBoundaryCapital,
+        borderColor: 'rgba(0, 255, 0, 0.8)',
+        borderWidth: 2,
+        borderDash: [2, 2],
+        pointRadius: 0,
+        fill: false
+      };
+      lowerBoundaryCapitalDataset = {
+        data: lowerBoundaryCapital,
+        borderColor: 'rgba(255, 0, 0, 0.8)',
+        borderWidth: 2,
+        borderDash: [2, 2],
+        pointRadius: 0,
+        fill: false
+      };
+    }
+    
+    totalTradeResult += cumulativeSum[cumulativeSum.length - 1];
+    totalProfitResult += profitSum[profitSum.length - 1] - capital;  
+    totalCommissionResult += totalCommission;
+  }
+  
+  updateCharts(tradeDatasets, profitDatasets, upperBoundaryDataset, lowerBoundaryDataset, upperBoundaryCapitalDataset, lowerBoundaryCapitalDataset);
+  
+  const lang = document.getElementById('langToggle').textContent === 'RU' ? 'ru' : 'en';
+  
+  let resultHTML = `<h3>${translations[lang].resultTitle}</h3>`;
+  resultHTML += `<p>${translations[lang].tradeBalance} ${totalTradeResult.toFixed(2)}<br>
+    ${translations[lang].profitInSeries} ${totalProfitResult.toFixed(2)}<br>
+    ${translations[lang].profitPerTrade} ${(totalProfitResult / numTrades).toFixed(2)}<br>
+    ${translations[lang].totalCommission} ${totalCommissionResult.toFixed(2)}</p>`;
+  
+  resultHTML += `<p>${translations[lang].calculationBasis} ${activeTab === 'fixedRiskProfit' ? translations[lang].fixedRiskProfitParams : translations[lang].dynamicRiskParams}</p>`;
+  
+  document.getElementById('result').innerHTML = resultHTML;
+}
+
+function updateCharts(tradeDatasets, profitDatasets, upperBoundaryDataset, lowerBoundaryDataset, upperBoundaryCapitalDataset, lowerBoundaryCapitalDataset) {
+  if (tradeChart) {
+    tradeChart.destroy();
+  }
+  if (profitChart) {
+    profitChart.destroy();
+  }
+  
+  const tradeCtx = document.getElementById('tradeChart').getContext('2d');
+  const profitCtx = document.getElementById('profitChart').getContext('2d');
+  
+  const showUpperBoundary = document.getElementById('showUpperBoundary').checked;
+  const showLowerBoundary = document.getElementById('showLowerBoundary').checked;
+  const showUpperBoundaryCapital = document.getElementById('showUpperBoundaryCapital').checked;
+  const showLowerBoundaryCapital = document.getElementById('showLowerBoundaryCapital').checked;
+
+  const isDarkTheme = !document.body.classList.contains('light-theme');
+  const textColor = isDarkTheme ? '#ffffff' : '#333333';
+  const gridColor = isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+  const lang = document.getElementById('langToggle').textContent === 'RU' ? 'ru' : 'en';
+
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        grid: {
+          color: gridColor
+        },
+        ticks: {
+          color: textColor
+        }
+      },
+      y: {
+        grid: {
+          color: gridColor
+        },
+        ticks: {
+          color: textColor
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: translations[lang].tradesChart,
+        color: textColor
+      },
+      tooltip: {
+        enabled: document.getElementById('showTooltips').checked,
+        mode: 'index',
+        intersect: false,
+      },
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    elements: {
+      line: {
+        tension: 0
+      }
+    }
+  };
+
+  tradeDatasets.forEach((dataset, index) => {
+    dataset.borderColor = getVibrantColor(index, isDarkTheme);
+    dataset.borderWidth = 1.5;  // Thinner lines
+  });
+
+  profitDatasets.forEach((dataset, index) => {
+    dataset.borderColor = getVibrantColor(index, isDarkTheme);
+    dataset.borderWidth = 1.5;  // Thinner lines
+  });
+
+  tradeChart = new Chart(tradeCtx, {
+    type: 'line',
+    data: {
+      labels: Array.from({length: tradeDatasets[0].data.length}, (_, i) => i + 1),
+      datasets: [
+        ...tradeDatasets,
+        ...(showUpperBoundary ? [upperBoundaryDataset] : []),
+        ...(showLowerBoundary ? [lowerBoundaryDataset] : [])
+      ]
+    },
+    options: commonOptions,
+    plugins: [{
+      id: 'verticalHoverLine',
+      afterDraw: drawVerticalLine
+    }, {
+      id: 'zeroLine',
+      beforeDraw(chart, args, options) {
+        const {ctx, chartArea: {top, right, bottom, left}, scales: {y}} = chart;
+        ctx.save();
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(left, y.getPixelForValue(0));
+        ctx.lineTo(right, y.getPixelForValue(0));
+        ctx.stroke();
+        ctx.restore();
+      }
+    }]
+  });
+  
+  profitChart = new Chart(profitCtx, {
+    type: 'line',
+    data: {
+      labels: Array.from({length: profitDatasets[0].data.length}, (_, i) => i + 1),
+      datasets: [
+        ...profitDatasets,
+        ...(showUpperBoundaryCapital ? [upperBoundaryCapitalDataset] : []),
+        ...(showLowerBoundaryCapital ? [lowerBoundaryCapitalDataset] : [])
+      ]
+    },
+    options: {
+      ...commonOptions,
+      scales: {
+        ...commonOptions.scales,
+        y: {
+          ...commonOptions.scales.y,
+          beginAtZero: false,
+          grace: '5%', 
+        }
+      },
+      plugins: {
+        ...commonOptions.plugins,
+        title: {
+          display: true,
+          text: translations[lang].capitalChart,
+          color: textColor
+        }
+      }
+    },
+    plugins: [{
+      id: 'verticalHoverLine',
+      afterDraw: drawVerticalLine
+    }, {
+      id: 'zeroLine',
+      beforeDraw(chart, args, options) {
+        const {ctx, chartArea: {top, right, bottom, left}, scales: {y}} = chart;
+        const capital = parseFloat(document.getElementById('capital').value);
+        ctx.save();
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(left, y.getPixelForValue(capital));
+        ctx.lineTo(right, y.getPixelForValue(capital));
+        ctx.stroke();
+        ctx.restore();
+      }
+    }]
+  });
+
+  syncCharts(tradeChart, profitChart);
+  syncCharts(profitChart, tradeChart);
+}
+
+function drawVerticalLine(chart, easing) {
+  if (chart.tooltip._active && chart.tooltip._active.length) {
+    const activePoint = chart.tooltip._active[0];
+    const ctx = chart.ctx;
+    const x = activePoint.element.x;
+    const topY = chart.scales.y.top;
+    const bottomY = chart.scales.y.bottom;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x, topY);
+    ctx.lineTo(x, bottomY);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#777777';
+    ctx.setLineDash([2, 2]);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function syncCharts(sourceChart, targetChart) {
+  sourceChart.options.onHover = (event, elements) => {
+    if (elements.length > 0) {
+      const sourceIndex = elements[0].index;
+      targetChart.setActiveElements([{ datasetIndex: 0, index: sourceIndex }]);
+      targetChart.tooltip.setActiveElements([{ datasetIndex: 0, index: sourceIndex }], { x: event.x, y: event.y });
+      targetChart.update();
+    } else {
+      targetChart.setActiveElements([]);
+      targetChart.tooltip.setActiveElements([], { x: event.x, y: event.y });
+      targetChart.update();
+    }
+  };
+}
+
+function syncInputAndSlider(inputId, sliderId) {
+  const input = document.getElementById(inputId);
+  const slider = document.getElementById(sliderId);
+
+  slider.addEventListener('input', function() {
+    input.value = this.value;
+  });
+
+  input.addEventListener('input', function() {
+    slider.value = this.value;
+  });
+}
+
+function showHelpPopup() {
+  document.getElementById('helpPopup').style.display = 'block';
+}
+
+function hideHelpPopup() {
+  document.getElementById('helpPopup').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Chart === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    script.onload = () => {
+      generateMultipleTrades();
+    };
+    document.head.appendChild(script);
+  } else {
+    generateMultipleTrades();
+  }
+  
+  document.getElementById('showTooltips').addEventListener('change', generateMultipleTrades);
+  document.getElementById('showUpperBoundary').addEventListener('change', generateMultipleTrades);
+  document.getElementById('showLowerBoundary').addEventListener('change', generateMultipleTrades);
+  document.getElementById('showUpperBoundaryCapital').addEventListener('change', generateMultipleTrades);
+  document.getElementById('showLowerBoundaryCapital').addEventListener('change', generateMultipleTrades);
+
+  syncInputAndSlider('numTrades', 'numTradesSlider');
+  syncInputAndSlider('positivePercentage', 'positivePercentageSlider');
+  syncInputAndSlider('capital', 'capitalSlider');  
+  syncInputAndSlider('risk', 'riskSlider');
+  syncInputAndSlider('profit', 'profitSlider');
+  syncInputAndSlider('commission', 'commissionSlider');
+  syncInputAndSlider('riskPercentage', 'riskPercentageSlider');
+  syncInputAndSlider('riskRewardRatio', 'riskRewardRatioSlider');
+  syncInputAndSlider('numVariants', 'numVariantsSlider');
+
+  const helpButton = document.getElementById('helpButton');
+  const helpPopup = document.getElementById('helpPopup');
+  const closeButton = helpPopup.querySelector('.close');
+
+  helpButton.addEventListener('click', showHelpPopup);
+  closeButton.addEventListener('click', hideHelpPopup);
+  window.addEventListener('click', (event) => {
+    if (event.target === helpPopup) {
+      hideHelpPopup();
+    }
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('click', toggleTheme);
+
+  const langToggle = document.getElementById('langToggle');
+  langToggle.addEventListener('click', toggleLanguage);
+
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+    themeToggle.textContent = '☽';
+  } else {
+    themeToggle.textContent = '☀';
+  }
+
+  // Initialize language
+  updateLanguage('ru');
+});
+
+function toggleLanguage() {
+  const langToggle = document.getElementById('langToggle');
+  if (langToggle.textContent === 'RU') {
+    langToggle.textContent = 'EN';
+    updateLanguage('en');
+  } else {
+    langToggle.textContent = 'RU';
+    updateLanguage('ru');
+  }
+}
+
+function updateLanguage(lang) {
+  const elements = document.querySelectorAll('[data-translate]');
+  elements.forEach(element => {
+    const key = element.getAttribute('data-translate');
+    if (translations[lang][key]) {
+      if (element.tagName === 'INPUT' && element.type === 'button') {
+        element.value = translations[lang][key];
+      } else {
+        element.textContent = translations[lang][key];
+      }
+    }
+  });
+  
+  // Update chart titles
+  if (tradeChart) {
+    tradeChart.options.plugins.title.text = translations[lang].tradesChart;
+    tradeChart.update();
+  }
+  if (profitChart) {
+    profitChart.options.plugins.title.text = translations[lang].capitalChart;
+    profitChart.update();
+  }
+  
+  // Update result text if present
+  updateResult();
+}
+
+function updateResult() {
+  const resultElement = document.getElementById('result');
+  if (resultElement.innerHTML) {
+    generateMultipleTrades();
+  }
+}
+
+function toggleTheme() {
+  const body = document.body;
+  const themeToggle = document.getElementById('themeToggle');
+  
+  if (body.classList.contains('light-theme')) {
+    body.classList.remove('light-theme');
+    themeToggle.textContent = '☀';
+    localStorage.setItem('theme', 'dark');
+  } else {
+    body.classList.add('light-theme');
+    themeToggle.textContent = '☽';
+    localStorage.setItem('theme', 'light');
+  }
+  
+  // Regenerate charts with new colors
+  generateMultipleTrades();
+}
+
+function updateChartColors() {
+  const isDarkTheme = !document.body.classList.contains('light-theme');
+  const textColor = isDarkTheme ? '#ffffff' : '#333333';
+  const gridColor = isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+  const updateChartOptions = (chart) => {
+    chart.options.scales.x.grid.color = gridColor;
+    chart.options.scales.x.ticks.color = textColor;
+    chart.options.scales.y.grid.color = gridColor;
+    chart.options.scales.y.ticks.color = textColor;
+    chart.options.plugins.title.color = textColor;
+    chart.update();
+  };
+
+  if (tradeChart) updateChartOptions(tradeChart);
+  if (profitChart) updateChartOptions(profitChart);
+}
+</script>
+
+</body></html>
